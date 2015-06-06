@@ -1,0 +1,22 @@
+#--- AntTweakBar
+find_package(AntTweakBar)
+if(ANTTWEAKBAR_FOUND)
+    include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
+    list(APPEND LIBRARIES ${ANTTWEAKBAR_LIBRARY})
+    add_definitions(-DWITH_ANTTWEAKBAR)
+
+    message(STATUS "AntTweakBar: ${ANTTWEAKBAR_LIBRARY}")
+
+    #--- X11 (required by AntTweakBar)
+    if(UNIX AND NOT APPLE)
+        find_package(X11)
+        if(NOT X11_FOUND)
+            message(FATAL_ERROR "Cannot found X11 on Linux. Necessary")
+        endif()
+        list(APPEND LIBRARIES ${X11_LIBRARIES})
+    endif()
+else()
+    # message(STATUS ANTTWEAKBAR_INCLUDE_DIR: ${ANTTWEAKBAR_INCLUDE_DIR})
+    # message(STATUS ANTTWEAKBAR_LIBRARY: ${ANTTWEAKBAR_LIBRARY})
+    message(STATUS "WARNING: AntTweakbar not found")
+endif()

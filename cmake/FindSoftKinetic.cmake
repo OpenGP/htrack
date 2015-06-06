@@ -1,0 +1,40 @@
+FIND_PATH( SOFTKINETIC_INCLUDE_DIR DepthSenseTypes.h
+    $ENV{SOFTKINETIC_DIR}
+    /opt/softkinetic/DepthSenseSDK/include
+    ${CMAKE_SOURCE_DIR}/external/softkinetic/DepthSenseSDK/include)
+
+find_library(TURBOJPEG_LIB
+             NAMES turbojpeg
+             PATHS /opt/softkinetic/DepthSenseSDK/lib)
+find_library(DEPTHSENSE_LIB
+             NAMES DepthSense
+             PATHS /opt/softkinetic/DepthSenseSDK/lib)
+find_library(DEPTHSENSEPLUGINS_LIB
+             NAMES DepthSensePlugins
+             PATHS /opt/softkinetic/DepthSenseSDK/lib)
+
+#message(STATUS "INCLUDES ${SOFTKINETIC_INCLUDE_DIRS}")
+#message(STATUS "LIBS ${DEPTHSENSE_LIB}, ${TURBOJPEG_LIB}, ${DEPTHSENSEPLUGINS_LIB}")
+
+if(TURBOJPEG_LIB AND DEPTHSENSE_LIB AND DEPTHSENSEPLUGINS_LIB)
+    LIST(APPEND SOFTKINETIC_LIBRARIES ${TURBOJPEG_LIB})
+    LIST(APPEND SOFTKINETIC_LIBRARIES ${DEPTHSENSE_LIB})
+    LIST(APPEND SOFTKINETIC_LIBRARIES ${DEPTHSENSEPLUGINS_LIB})
+endif()
+
+
+IF(SOFTKINETIC_INCLUDE_DIR AND SOFTKINETIC_LIBRARIES)
+   SET(SOFTKINETIC_FOUND TRUE)
+else()
+   SET(SOFTKINETIC_FOUND FALSE)
+ENDIF()
+
+IF(SOFTKINETIC_FOUND)
+    IF(NOT CMAKE_FIND_QUIETLY)
+        MESSAGE(STATUS "Found SoftKinetic: ${SOFTKINETIC_INCLUDE_DIR}")
+    ENDIF()
+ELSE()
+    IF(SOFTKINETIC_FOUND_REQUIRED)
+        MESSAGE(FATAL_ERROR "Could not find SoftKinetic")
+    ENDIF()
+ENDIF()

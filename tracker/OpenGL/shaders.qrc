@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>DebugRenderer/CloudRenderer_fshader.glsl</file>
+        <file>DebugRenderer/CloudRenderer_vshader.glsl</file>
+        <file>KinectDataRenderer/KinectDataRenderer_fshader.glsl</file>
+        <file>KinectDataRenderer/KinectDataRenderer_vshader.glsl</file>
+        <file>CylindersRenderer/Cylinders_FB_fshader.glsl</file>
+        <file>CylindersRenderer/Cylinders_FB_vshader.glsl</file>
+        <file>CylindersRenderer/Cylinders_fshader.glsl</file>
+        <file>CylindersRenderer/Cylinders_vshader.glsl</file>
+        <file>QuadRenderer/QuadRenderer_color_fshader.glsl</file>
+        <file>QuadRenderer/QuadRenderer_depth_fshader.glsl</file>
+        <file>QuadRenderer/QuadRenderer_vshader.glsl</file>
+    </qresource>
+</RCC>
