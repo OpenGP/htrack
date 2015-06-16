@@ -73,7 +73,7 @@ public:
     }
     
     void load(QString filename){
-        TIMED_SCOPE(timer,"SolutionStream::load()");
+        TICTOC_SCOPE(timer,"SolutionStream::load()");
         
         std::string line;
         std::ifstream in(filename.toStdString());
