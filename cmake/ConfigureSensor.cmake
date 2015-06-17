@@ -1,0 +1,30 @@
+#--- Choose a sensor
+
+SET(SENSOR_DEPTHSENSEGRABBER 0 CACHE BOOL "Use Softkinetic with DepthSenseGrabber")
+SET(SENSOR_SOFTKINETIC 0 CACHE BOOL "Use Softkinetic with DepthSenseGrabber")
+SET(SENSOR_COUNT 0)
+if (SENSOR_DEPTHSENSEGRABBER)
+    if (SENSOR_COUNT EQUAL 0)
+        set(SENSOR_COUNT 1)
+        set(SENSOR_TYPE DEPTHSENSEGRABBER)
+        message(STATUS "Enabling DepthSenseGrabber")
+    else (SENSOR_COUNT EQUAL 0)
+        message(FATAL_ERROR "More than one sensor chosen")
+    endif (SENSOR_COUNT EQUAL 0)
+endif (SENSOR_DEPTHSENSEGRABBER)
+
+if (SENSOR_SOFTKINETIC)
+    if (SENSOR_COUNT EQUAL 0)
+        set(SENSOR_COUNT 1)
+        set(SENSOR_TYPE SOFTKINETIC)
+        message(STATUS "Enabling SoftKinetic")
+    else (SENSOR_COUNT EQUAL 0)
+        message(FATAL_ERROR "More than one sensor chosen")
+    endif (SENSOR_COUNT EQUAL 0)
+endif (SENSOR_SOFTKINETIC)
+
+if (NOT SENSOR_COUNT)
+    message(FATAL_ERROR "Please choose a sensor")
+endif (NOT SENSOR_COUNT)
+
+set(DEFINITION_SENSOR "-D${SENSOR_TYPE}")

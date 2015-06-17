@@ -83,6 +83,8 @@ void onNewColorSample(ColorNode, ColorNode::NewSampleReceivedData data);
 void onNewDepthSample(DepthNode node, DepthNode::NewSampleReceivedData data);
 
 
+int kernel_length = 3; // used if DEPTHSENSEGRABBER_SMOOTH is defined
+
 void configureDepthNode() {
     g_dnode.newSampleReceivedEvent().connect(&onNewDepthSample);
     DepthNode::Configuration config = g_dnode.getConfiguration();
@@ -290,9 +292,13 @@ void onNewDepthSample(DepthNode node, DepthNode::NewSampleReceivedData data) {
         }
     }
 
-    int kernel_length = 3;
+#define DEPTHSENSEGRABBER_SMOOTH
+#if defined(DEPTHSENSEGRABBER_SMOOTH)
+    // We smoothen the depth maps using a spatial Gaussian filter
+    // Temporal smoothing would be more appropriate but adds a constraint on motion speed
     cv::GaussianBlur( depth[BACK_BUFFER], depth[BACK_BUFFER], cv::Size( kernel_length, kernel_length ), 0, 0 );
-    
+#endif
+
     ///--- safe swap front & back
     // std::lock_guard<std::mutex> lock(color_mutex);
     while (true) {

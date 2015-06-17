@@ -148,26 +148,22 @@ int main(int argc, char* argv[]){
     std::cout << "htrack starting" << std::endl;
     std::cout << "--Execution path: " << QDir::currentPath().toStdString() << std::endl;
 
-//#define SOFTKIN
-#if defined(SOFTKIN) && !defined(__APPLE__)
+#if defined(SOFTKINETIC) && !defined(__APPLE__)
     Camera camera(Intel, 60 /*FPS*/);
     SensorSoftKin sensor(&camera);
 #endif
 
-#define DEPTHSENSEGRABBER
 #if defined(DEPTHSENSEGRABBER) && !defined(__APPLE__)
     Camera camera(Intel, 60 /*FPS*/);
     SensorDepthSenseGrabber sensor(&camera);
 #endif
 
-//#define OPENNI
 #if defined(OPENNI)
     ////Camera camera(QVGA, 60 /*FPS*/);
     Camera camera(QVGA, 30 /*FPS*/);
     SensorOpenNI sensor(&camera);
 #endif
 
-//#define REALSENSE
 #if defined(REALSENSE)
     Camera camera(QVGA, 60 /*FPS*/);
     SensorRealSense sensor(&camera);

@@ -31,6 +31,7 @@ include(cmake/ConfigureOpenCV.cmake)
 include(cmake/ConfigureOpenNI.cmake)
 include(cmake/ConfigureRealSense.cmake)
 include(cmake/ConfigureSoftKinetic.cmake)
+include(cmake/ConfigureSensor.cmake)
 include(cmake/ConfigureCUDA.cmake)
 include(cmake/ConfigureAntTweakBar.cmake)
 
@@ -38,17 +39,10 @@ include(cmake/ConfigureAntTweakBar.cmake)
 add_subdirectory(util)
 add_subdirectory(cudax)
 add_subdirectory(tracker)
+
+add_definitions(${DEFINITION_SENSOR})
+
 add_subdirectory(apps/htrack_atb)
 add_subdirectory(apps/htrack_qt)
 #add_subdirectory(apps/synthgen) #<<< NOT READY
 #add_subdirectory(apps/colopick) #<<< NOT READY
-
-#add_subdirectory(apps/helloworld)
-#add_subdirectory(apps/helloworld_opencv)
-#add_subdirectory(apps/helloworld_qtopengl)
-#add_subdirectory(apps/helloworld_atb) # only for htrack-atb
-#add_subdirectory(apps/helloworld_cudagl)
-#add_subdirectory(apps/helloworld_cublas)
-#add_subdirectory(apps/helloworld_thrust)
-#add_subdirectory(apps/helloworld_openmp) # linux-only
-#add_subdirectory(apps/helloworld_qglviewer) # only for htrack-qt
