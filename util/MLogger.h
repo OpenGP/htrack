@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <ostream>
+#include <cstdarg>
 
 class MLogger{
     bool _with_space = true;
