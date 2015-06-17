@@ -1,3 +1,9 @@
+/*
+Low pass filter from
+http://www-users.cs.york.ac.uk/~fisher/cgi-bin/mkfscript
+*/
+
+
 #include "Sensor.h"
 #include "util/mylogger.h"
 #include "tracker/Data/DataFrame.h"
@@ -31,6 +37,9 @@ void SensorDepthSenseGrabber::stop(){}
 #include <QEventLoop>
 #include "tracker/Data/Camera.h"
 
+
+
+
 using namespace DepthSense;
 using namespace std;
 
@@ -44,6 +53,80 @@ int frameRateColor = 30;
 
 FrameFormat frameFormatDepth = FRAME_FORMAT_QVGA;
 const int widthDepth = 320, heightDepth = 240;
+
+/***********************************************************
+* Low pass filter                                          *
+* http://www-users.cs.york.ac.uk/~fisher/cgi-bin/mkfscript *
+***********************************************************/
+
+uint16_t maxDeltaDepth = 50;
+
+#define NZEROS 2
+#define NPOLES 2
+#define GAIN   1.076862368e+00
+
+#define FILTER_SIZE (NZEROS+1)
+float xvAll[heightDepth*widthDepth*(NZEROS+1)], yvAll[heightDepth*widthDepth*(NPOLES+1)];
+
+uint16_t filter(uint16_t sample, float* xv, float* yv)
+    // static_cast<float>(sample)
+      {
+        bool isInRange = true;
+        for (int i = 0; i < FILTER_SIZE; i++) {
+            isInRange *= abs(sample - yv[i]) < maxDeltaDepth;
+        }
+        if (not isInRange) return sample;
+        xv[0] = xv[1]; xv[1] = xv[2]; 
+        xv[2] = static_cast<float>(sample) / GAIN;
+        yv[0] = yv[1]; yv[1] = yv[2]; 
+        yv[2] =   (xv[0] + xv[2]) + 2 * xv[1]
+                     + ( -0.8623486260 * yv[0]) + ( -1.8521464854 * yv[1]);
+        return static_cast<uint16_t>(yv[2]);
+      }
+
+
+//http://www.exstrom.com/journal/sigproc/
+
+const int filterOrder = 2;
+const int filterSize = filterOrder/2;
+const int filterSamplingFreq = frameRateDepth;
+const int filterCornerFreq = 29;
+
+float filterA[filterSize];
+float filterD1[filterSize];
+float filterD2[filterSize];
+
+float w0All[heightDepth*widthDepth*filterSize];
+float w1All[heightDepth*widthDepth*filterSize];
+float w2All[heightDepth*widthDepth*filterSize];
+
+void initFilterWeights(float* A, float* d1, float* d2, int n, int s, int f) {
+    float a = tan(M_PI*f/s);
+    float a2 = a*a;
+    for (int i = 0; i < n; i++) {
+        float r = sin(M_PI*(2.0*i+1.0)/(4.0*n));
+        float t = a2 + 2.0*a*r + 1.0;
+        A[i] = a2/t;
+        d1[i] = 2.0*(1-a2)/t;
+        d2[i] = -(a2 - 2.0*a*r + 1.0)/t;
+    }
+}
+
+uint16_t filterNew(uint16_t sample, float* w0, float* w1, float* w2, int n, float* A, float* d1, float* d2) {
+    float x = static_cast<float>(sample);
+    for(int i=0; i < n; ++i){
+        w0[i] = d1[i]*w1[i] + d2[i]*w2[i] + x;
+        x = A[i]*(w0[i] + 2.0*w1[i] + w2[i]);
+        w2[i] = w1[i];
+        w1[i] = w0[i];
+    }
+    uint16_t filteredVal = static_cast<uint16_t>(x);
+    bool isInRange = abs(filteredVal - sample) < maxDeltaDepth;
+    if (not isInRange) return sample;
+    return static_cast<uint16_t>(x);
+}
+
+
 
 ///--- @note we read VGA, but then sub-sample to QVGA
 FrameFormat frameFormatColor = FRAME_FORMAT_VGA;
@@ -273,6 +356,17 @@ void onNewDepthSample(DepthNode node, DepthNode::NewSampleReceivedData data) {
 #endif
            //cout << d << " ";
 
+            /*
+            float* xvLoc = xvAll + countDepth*(NZEROS+1);
+            float* yvLoc = yvAll + countDepth*(NPOLES+1);
+            d = filter(d, xvLoc, yvLoc);
+            */
+
+            float* w0 = w0All + countDepth*filterSize;
+            float* w1 = w1All + countDepth*filterSize;
+            float* w2 = w2All + countDepth*filterSize;
+            d = filterNew(d, w0, w1, w2, filterSize, filterA, filterD1, filterD2);
+
             ///--- Fetch color using UV map + raw color
             UV uv = data.uvMap[countDepth];
             int colorPixelRow = round(uv.v * heightColor); ///< -1??
@@ -445,6 +539,10 @@ bool SensorDepthSenseGrabber::fetch_streams(DataFrame &frame){
 
 void SensorDepthSenseGrabber::start()
 {
+#define DEPTHSENSEGRABBER_BUTTERWORTH
+#ifdef DEPTHSENSEGRABBER_BUTTERWORTH
+    initFilterWeights(filterA, filterD1, filterD2, filterSize, filterSamplingFreq, filterCornerFreq);
+#endif //DEPTHSENSEGRABBER_BUTTERWORTH
     if(!initialized)
         this->initialize();
     g_context.startNodes();
