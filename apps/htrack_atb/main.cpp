@@ -148,8 +148,12 @@ int main(int argc, char* argv[]){
     std::cout << "htrack starting" << std::endl;
     std::cout << "--Execution path: " << QDir::currentPath().toStdString() << std::endl;
 
-    Camera camera(QVGA, 60 /*FPS*/);
-    SensorRealSense sensor(&camera);
+    //Camera camera(QVGA, 60 /*FPS*/);
+    Camera camera(QVGA, 30 /*FPS*/);
+    //Camera camera(Intel, 30 /*FPS*/);
+    //SensorRealSense sensor(&camera);
+    SensorOpenNI sensor(&camera);
+    //SensorSoftKin sensor(&camera);
     Worker worker(&camera);
     GLWidget glarea(&worker);
     glarea.resize(640*2,480*2); ///< force resize

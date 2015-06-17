@@ -42,3 +42,13 @@ add_subdirectory(apps/htrack_atb)
 add_subdirectory(apps/htrack_qt)
 #add_subdirectory(apps/synthgen) #<<< NOT READY
 #add_subdirectory(apps/colopick) #<<< NOT READY
+
+#add_subdirectory(apps/helloworld)
+#add_subdirectory(apps/helloworld_opencv)
+#add_subdirectory(apps/helloworld_qtopengl)
+#add_subdirectory(apps/helloworld_atb) # only for htrack-atb
+#add_subdirectory(apps/helloworld_cudagl)
+#add_subdirectory(apps/helloworld_cublas)
+#add_subdirectory(apps/helloworld_thrust)
+#add_subdirectory(apps/helloworld_openmp) # linux-only
+#add_subdirectory(apps/helloworld_qglviewer) # only for htrack-qt

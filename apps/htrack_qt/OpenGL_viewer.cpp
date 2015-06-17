@@ -37,7 +37,7 @@ OpenGL_viewer::OpenGL_viewer(Worker *_worker) : OpenGL_viewer_Superclass(OpenGL3
     CHECK_NOTNULL(worker->cylinders);
     CHECK_NOTNULL(worker->skeleton);
     CHECK_NOTNULL(worker->camera);
-    
+
     color_ch = std::make_shared<QuadRenderer>(QuadRenderer::Color, _camera);
     depth_ch = std::make_shared<QuadRenderer>(QuadRenderer::Depth, _camera);
     mrenderer = std::make_shared<Cylinders_renderer>(worker->cylinders);
@@ -53,7 +53,7 @@ OpenGL_viewer::OpenGL_viewer(Worker *_worker) : OpenGL_viewer_Superclass(OpenGL3
 #else
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 #endif
-    
+
     ///--- Create the contextual menu
     contextual = new QMenu(this);
     auto add_entry = [=](const char* name, bool _default) {
@@ -61,23 +61,23 @@ OpenGL_viewer::OpenGL_viewer(Worker *_worker) : OpenGL_viewer_Superclass(OpenGL3
         action->setCheckable(true);
         action->setChecked(_default);
         return action;
-    };   
+    };
     draw_model = add_entry("draw_model", true);
     draw_cloud = add_entry("draw_cloud", true);
     draw_skeleton = add_entry("draw_skeleton", false);
     contextual->addSeparator();
     draw_sensor_color = add_entry("draw_sensor_color", true);
     draw_sensor_depth = add_entry("draw_sensor_depth", true);
-    contextual->addSeparator();    
-    disable_depth_test = add_entry("disable_depth_test", false);    
+    contextual->addSeparator();
+    disable_depth_test = add_entry("disable_depth_test", false);
     use_kinect_camera = add_entry("use_kinect_camera", false);
     draw_color_fullscreen = add_entry("draw_color_fullscreen", false);
     draw_depth_fullscreen = add_entry("draw_depth_fullscreen", false);
-    contextual->addSeparator();    
+    contextual->addSeparator();
     draw_debug = add_entry("draw_debug", true);
     clear_debug = contextual->addAction("clear_debug");
     wristband_colormap = add_entry("wristband_colormap", true);
-    
+
 #ifdef RESULTS
     disable_depth_test->setChecked(true);
     draw_model->setChecked(false);
@@ -86,7 +86,7 @@ OpenGL_viewer::OpenGL_viewer(Worker *_worker) : OpenGL_viewer_Superclass(OpenGL3
     draw_sensor_depth->setChecked(false);
     use_kinect_camera->setChecked(true);
 #endif
-    
+
     ///--- Connect single shot events
     connect(clear_debug, &QAction::triggered, &(DebugRenderer::instance()), &DebugRenderer::clear);
 }
@@ -96,7 +96,7 @@ OpenGL_viewer::~OpenGL_viewer(){
 }
 
 void OpenGL_viewer::contextMenuEvent(QContextMenuEvent* event)
-{ 
+{
 #ifdef __unix__
     // MS: my OS already uses alt+click, but not ctrl+click
     if(event->modifiers().testFlag(Qt::ControlModifier))
@@ -104,8 +104,8 @@ void OpenGL_viewer::contextMenuEvent(QContextMenuEvent* event)
     if(event->modifiers().testFlag(Qt::AltModifier))
 #endif
     {
-        contextual->exec(event->globalPos()); 
-        updateGL(); 
+        contextual->exec(event->globalPos());
+        updateGL();
     }
 }
 
@@ -115,13 +115,13 @@ void OpenGL_viewer::initializeGL(){
     LOG(INFO) << "OpenGL_viewer::initializeGL() OpenGL" << this->format().majorVersion() << "." << this->format().minorVersion();
     glClearColor(1.0, 1.0, 1.0, 0.0);
     glEnable(GL_DEPTH_TEST);
-    
+
 #ifdef WITH_QGLVIEWER
     camera()->frame()->setSpinningSensitivity(100); ///<<< Disable spin
-    
+
     /// Setup default camera
     reset_camera();
-    
+
     /// Bindings @see QGLViewer::setDefaultMouseBindings()
     /// Extra behavior in this->mouseDoubleClickEvent()
     {
@@ -129,13 +129,13 @@ void OpenGL_viewer::initializeGL(){
         setMouseBinding(Qt::NoModifier, Qt::LeftButton, NO_CLICK_ACTION, true);   /// ALIGN_CAMERA
         setMouseBinding(Qt::ShiftModifier, Qt::RightButton, NO_CLICK_ACTION);     /// RAP_FROM_PIXEL
         setMouseBinding(Qt::NoModifier, Qt::MiddleButton, NO_CLICK_ACTION, true); /// ZOOM_TO_FIT
-    }  
+    }
 #endif
 
 #ifdef WITH_GLEW
     initialize_glew();
 #endif
-    
+
     ///--- Compile/initialize shaders
     mrenderer->init(Cylinders_renderer::NORMAL);
     srenderer->init(Cylinders_renderer::SKINNY);
@@ -143,12 +143,12 @@ void OpenGL_viewer::initializeGL(){
     depth_ch->init();
     kinect_renderer->init(_camera);
     CHECK_ERROR_GL();
-    
+
     ///--- Initialize other graphic resources
     this->makeCurrent();
     worker->init_graphic_resources();
-    
-    ///--- Setup with data from worker   
+
+    ///--- Setup with data from worker
     color_ch->setup(worker->sensor_color_texture->texid());
     depth_ch->setup(worker->sensor_depth_texture->texid());
     kinect_renderer->setup(worker->sensor_color_texture->texid(), worker->sensor_depth_texture->texid());
@@ -203,7 +203,7 @@ void OpenGL_viewer::reload_model(){
 
 int OpenGL_viewer::width() {
     qreal r = window()->windowHandle()->devicePixelRatio();
-    return QGLWidget::width()*r;    
+    return QGLWidget::width()*r;
 }
 
 int OpenGL_viewer::height() {
@@ -211,23 +211,23 @@ int OpenGL_viewer::height() {
     return QGLWidget::height()*r;
 }
 
-void OpenGL_viewer::paintGL() {  
+void OpenGL_viewer::paintGL() {
     /// Mostly for results generation
     glEnable(GL_MULTISAMPLE);
-       
+
     glEnable(GL_DEPTH_TEST);
     glViewport(0,0,this->width(),this->height());
     if(transparent_background)
         glClearColor(1,1,1,0); ///< transparent background
     else
         glClearColor(1,1,1,1);
-   
+
     ///--- Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     ///--- Setup camera (Model View Projection)
     bool use_kinect_camera = this->use_kinect_camera->isChecked();
-        
+
     Eigen::Matrix4f view_projection;
     Eigen::Matrix4f view;
 #ifndef WITH_QGLVIEWER
@@ -252,43 +252,43 @@ void OpenGL_viewer::paintGL() {
     }
     // std::cout << "MVP\n" << MVP << std::endl;
     // std::cout << "MVP" << Camera(QVGA).view_projection_matrix() << std::endl;
-       
+
     if (draw_debug->isChecked()){
         DebugRenderer::instance().set_uniform("view_projection",view_projection);
         DebugRenderer::instance().render();
         CHECK_ERROR_GL();
     }
-    
+
     if(use_kinect_camera)
     {
         if ( draw_color_fullscreen->isChecked() )
         {
             glViewport(0,0,this->width(),this->height());
             color_ch->render();
-        } 
+        }
         else if( draw_depth_fullscreen->isChecked() )
         {
             glViewport(0,0,this->width(),this->height());
             depth_ch->render();
         }
     }
-       
+
     ///--- draw model
     if (draw_model->isChecked()){
-        mrenderer->set_uniform("view",view);        
-        mrenderer->set_uniform("view_projection",view_projection);       
+        mrenderer->set_uniform("view",view);
+        mrenderer->set_uniform("view_projection",view_projection);
         mrenderer->render();
         CHECK_ERROR_GL();
     }
-    
+
     ///--- draw skeleton (when it's shown transparency)
     if (draw_skeleton->isChecked() && disable_depth_test->isChecked()){
-        srenderer->set_uniform("view",view);        
+        srenderer->set_uniform("view",view);
         srenderer->set_uniform("view_projection",view_projection);
         srenderer->render();
         CHECK_ERROR_GL();
     }
-    
+
     ///--- draw kinect point cloud in shader
     if(draw_cloud->isChecked())
     {
@@ -298,21 +298,21 @@ void OpenGL_viewer::paintGL() {
             kinect_renderer->set_zNear(worker->handfinder->wristband_center()[2] - 150);
             kinect_renderer->set_zFar(worker->handfinder->wristband_center()[2] + 150);
         }
-        
+
         kinect_renderer->set_uniform("view_projection",view_projection);
         kinect_renderer->render();
         CHECK_ERROR_GL();
     }
-     
+
     ///--- draw skeleton (when it's shown on top)
     if (draw_skeleton->isChecked() && !disable_depth_test->isChecked()){
         glClear(GL_DEPTH_BUFFER_BIT);
-        srenderer->set_uniform("view",view);        
+        srenderer->set_uniform("view",view);
         srenderer->set_uniform("view_projection",view_projection);
         srenderer->render();
         CHECK_ERROR_GL();
     }
-    
+
     ///--- channels overlay
     {
         ///--- Settings
@@ -320,7 +320,7 @@ void OpenGL_viewer::paintGL() {
         const float ratio = 240.0/320.0;
         int height = width*ratio;
         const int pad = 10;
-        
+
         if(draw_sensor_color->isChecked()){
             glViewport(pad,this->height()-height-pad,width,height); ///< Top left
             color_ch->render();
@@ -333,7 +333,7 @@ void OpenGL_viewer::paintGL() {
             CHECK_ERROR_GL();
         }
     }
-    
+
     glDisable(GL_MULTISAMPLE);
     CHECK_ERROR_GL();
 }

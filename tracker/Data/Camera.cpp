@@ -14,9 +14,9 @@ Camera::Camera(CAMERAMODE mode, int fps):_mode(mode), _fps(fps){
     /// By default we only care from 30cm to 1.5m
     _zNear = 300 /*mm*/;
     _zFar = 1500 /*mm*/;
-    
+
     switch(_mode){
-        case VGA: 
+        case VGA:
             _width = 640;
             _height = 480;
             _focal_length_x = 525.5;
@@ -56,21 +56,21 @@ Camera::Camera(CAMERAMODE mode, int fps):_mode(mode), _fps(fps){
            _focal_length_y = 230.494;
            _zFar = 500;
            _zNear = 100;
-            break;            
-        default: 
-            printf("!!!FATAL: Invalid Camera"); 
+            break;
+        default:
+            printf("!!!FATAL: Invalid Camera");
             exit(0);
     }
-    
+
     ///--- Assemble projection matrix
-    auto kinectproj = [=]() { 
+    auto kinectproj = [=]() {
         Matrix33f cam_matrix = Matrix33f::Zero();
         cam_matrix (0, 0) = _focal_length_x; /// FocalLength X
         cam_matrix (1, 1) = _focal_length_y; /// FocalLength Y
         cam_matrix (0, 2) = _width / 2;      /// CameraCenter X
         cam_matrix (1, 2) = _height / 2;     /// CameraCenter Y
         cam_matrix (2, 2) = 1.0;
-        return cam_matrix; 
+        return cam_matrix;
     };
     proj = kinectproj();
     iproj = proj.inverse();
@@ -110,7 +110,7 @@ Camera::Matrix44f Camera::view_projection_matrix(){
     Matrix33f& K = proj;
     int w = this->width();
     int h = this->height();
-    
+
     Matrix44f mat = Matrix44f::Identity();
     mat(0,0) = 2.0/(float)w*K(0,0); // use camera instrinsics and convert to GL [0,h] => [-1,1]
     mat(0,2) = (2.0/(float)w*(K(0,2)+0.5))-1.0; // 0.5 offset as GL pixel middle point is at 0.5,0.5
@@ -123,7 +123,7 @@ Camera::Matrix44f Camera::view_projection_matrix(){
     // W
     mat(3,2) = 1; // not as in GL where it would be -1
     mat(3,3) = 0;
-    
+
     return mat;
 }
 
