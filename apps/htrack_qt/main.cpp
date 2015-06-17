@@ -88,6 +88,7 @@ int main(int argc, char* argv[]) {
     glarea->reload_model();
 
     ///--- Flip the hand model if desired
+//#define RIGHT_HAND
 #ifdef RIGHT_HAND
     /// special case for left-handed calibration...
     if (!datastream.get_prefix().startsWith("maschroemelax")) {

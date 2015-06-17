@@ -44,6 +44,18 @@ private:
     int initialize();
 };
 
+class SensorDepthSenseGrabber : public Sensor{
+public:
+    SensorDepthSenseGrabber(Camera* camera);
+    virtual ~SensorDepthSenseGrabber();
+    bool spin_wait_for_data(float timeout_seconds);
+    bool fetch_streams(DataFrame& frame);
+    void start(); ///< calls initialize
+    void stop();
+private:
+    int initialize();
+};
+
 class SensorRealSense : public Sensor {
 public:
 	SensorRealSense(Camera* camera);
