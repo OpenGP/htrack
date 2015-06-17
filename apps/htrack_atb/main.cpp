@@ -148,8 +148,25 @@ int main(int argc, char* argv[]){
     std::cout << "htrack starting" << std::endl;
     std::cout << "--Execution path: " << QDir::currentPath().toStdString() << std::endl;
 
-    Camera camera(QVGA, 60 /*FPS*/);
-    SensorRealSense sensor(&camera);
+    //#define SOFTKIN
+    #if defined(SOFTKIN) && !defined(__APPLE__)
+        Camera camera(Intel, 60 /*FPS*/);
+        SensorSoftKin sensor(&camera);
+    #endif
+
+    #define OPENNI
+    #if defined(OPENNI)
+        Camera camera(QVGA, 60 /*FPS*/);
+        // Camera camera(QVGA, 30 /*FPS*/);
+        SensorOpenNI sensor(&camera);
+    #endif
+
+    //#define REALSENSE
+    #if defined(REALSENSE)
+        Camera camera(QVGA, 60 /*FPS*/);
+        SensorRealSense sensor(&camera);
+    #endif
+
     Worker worker(&camera);
     GLWidget glarea(&worker);
     glarea.resize(640*2,480*2); ///< force resize

@@ -3,12 +3,13 @@
 
 #include "util/gl_wrapper.h"
 #include <memory>
-#include <QGLViewer/qglviewer.h>
 #include <QMenu>
 
 #ifdef WITH_QGLVIEWER
+#include <QGLViewer/qglviewer.h>
 typedef QGLViewer OpenGL_viewer_Superclass;
 #else
+#include <QGLWidget>
 typedef QGLWidget OpenGL_viewer_Superclass;
 #endif
 

@@ -39,14 +39,14 @@ int main(int argc, char* argv[]) {
     SensorSoftKin sensor(&camera);
 #endif
 
-//#define OPENNI
+#define OPENNI
 #if defined(OPENNI)
     Camera camera(QVGA, 60 /*FPS*/);
-    Camera camera(QVGA, 30 /*FPS*/);
+    // Camera camera(QVGA, 30 /*FPS*/);
     SensorOpenNI sensor(&camera);
 #endif
 
-#define REALSENSE
+//#define REALSENSE
 #if defined(REALSENSE)
     Camera camera(QVGA, 60 /*FPS*/);
     SensorRealSense sensor(&camera);

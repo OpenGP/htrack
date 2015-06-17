@@ -6,6 +6,7 @@
 #include "tracker/OpenGL/DebugRenderer/DebugRenderer.h"
 #include "cudax/Timer.h"
 #include "util/opencv_wrapper.h"
+#include "util/mylogger.h"
 
 #include "tracker/Worker.h"
 #include "tracker/Tracker.h"

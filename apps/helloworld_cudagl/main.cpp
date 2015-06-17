@@ -5,11 +5,11 @@
 //   [1000x (w/  offscreen draw)] 1687.07 ms
 //   [1000x (w/o offscreen draw)] 1438.53 ms
 //   [cudaGraphicsUnregisterResource] 0.555032 ms
-// Performance on GeForce GTX980 (Ubuntu):
-//   [cudaGraphicsGLRegisterImage]
-//   [1000x (w/  offscreen draw)]
-//   [1000x (w/o offscreen draw)]
-//   [cudaGraphicsUnregisterResource]
+// Performance on GeForce GTX980 and i5@3Ghz (Ubuntu@MIT):
+//    [cudaGraphicsGLRegisterImage] 170.678 ms
+//    [1000x (w/  offscreen draw)] 204.626 ms
+//    [1000x (w/o offscreen draw)] 195.564 ms
+//    [cudaGraphicsUnregisterResource] 0.12116 ms
 // Performance on GeForce GTX980 (Win8.1):
 //   [cudaGraphicsGLRegisterImage] 109.379 ms
 //   [1000x (w/  offscreen draw)] 182.223 ms

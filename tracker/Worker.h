@@ -18,7 +18,7 @@ class Worker{
 /// @{ Settings
 public:
    struct Settings{
-       int termination_max_iters = 5;
+       int termination_max_iters = 7;
        int termination_max_rigid_iters = 1;
    } _settings;
    Settings*const settings = &_settings;
