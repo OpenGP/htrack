@@ -38,6 +38,11 @@ include(cmake/ConfigureAntTweakBar.cmake)
 add_subdirectory(util)
 add_subdirectory(cudax)
 add_subdirectory(tracker)
+
+#--- Choose which sensor to use
+include(cmake/ConfigureSensor.cmake)
+add_definitions(${DEFINITION_SENSOR})
+
 add_subdirectory(apps/htrack_atb)
 add_subdirectory(apps/htrack_qt)
 #add_subdirectory(apps/synthgen) #<<< NOT READY

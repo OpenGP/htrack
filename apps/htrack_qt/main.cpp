@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QString>
 #include <QDebug>
-#include <QDir> 
+#include <QDir>
 #include <QThread>
 
 
@@ -33,20 +33,22 @@ int main(int argc, char* argv[]) {
     QThread::currentThread()->setObjectName("Main thread");
     QThread::currentThread()->setPriority(QThread::HighestPriority);
 
-//#define SOFTKIN
 #if defined(SOFTKIN) && !defined(__APPLE__)
     Camera camera(Intel, 60 /*FPS*/);
     SensorSoftKin sensor(&camera);
 #endif
 
-#define OPENNI
+#if defined(DEPTHSENSEGRABBER) && !defined(__APPLE__)
+    Camera camera(Intel, 60 /*FPS*/);
+    SensorDepthSenseGrabber sensor(&camera);
+#endif
+
 #if defined(OPENNI)
     Camera camera(QVGA, 60 /*FPS*/);
     // Camera camera(QVGA, 30 /*FPS*/);
     SensorOpenNI sensor(&camera);
 #endif
 
-//#define REALSENSE
 #if defined(REALSENSE)
     Camera camera(QVGA, 60 /*FPS*/);
     SensorRealSense sensor(&camera);
@@ -88,6 +90,7 @@ int main(int argc, char* argv[]) {
     glarea->reload_model();
 
     ///--- Flip the hand model if desired
+//#define RIGHT_HAND
 #ifdef RIGHT_HAND
     /// special case for left-handed calibration...
     if (!datastream.get_prefix().startsWith("maschroemelax")) {
