@@ -10,7 +10,8 @@
               Sofien Bouaziz        and   Mario Botsch        and   Mark Pauly},
     title = {Robust Articulated-ICP for Real-Time Hand Tracking},
     journal = {Symposium on Geometry Processing (Computer Graphics Forum)},
-    year = 2013}
+    month = July,
+    year = 2015}
 
 ## News
 - June 12th 2015: official code release (in sync with CVPR'15 HANDS workshop)
