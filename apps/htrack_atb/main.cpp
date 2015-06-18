@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
     std::cout << "htrack starting" << std::endl;
     std::cout << "--Execution path: " << QDir::currentPath().toStdString() << std::endl;
 
-#if defined(SOFTKINETIC) && !defined(__APPLE__)
+#if defined(SOFTKIN) && !defined(__APPLE__)
     Camera camera(Intel, 60 /*FPS*/);
     SensorSoftKin sensor(&camera);
 #endif
@@ -159,8 +159,7 @@ int main(int argc, char* argv[]){
 #endif
 
 #if defined(OPENNI)
-    ////Camera camera(QVGA, 60 /*FPS*/);
-    Camera camera(QVGA, 30 /*FPS*/);
+    Camera camera(QVGA, 60 /*FPS*/);
     SensorOpenNI sensor(&camera);
 #endif
 
@@ -171,7 +170,7 @@ int main(int argc, char* argv[]){
 
     Worker worker(&camera);
     GLWidget glarea(&worker);
-    //glarea.resize(640*2,480*2); ///< force resize
+    glarea.resize(640*2,480*2); ///< force resize
     worker.bind_glarea(&glarea); ///< TODO: can we avoid this?
 
     ///--- Load calibration

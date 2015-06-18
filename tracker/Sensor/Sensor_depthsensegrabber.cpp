@@ -8,7 +8,7 @@ http://www-users.cs.york.ac.uk/~fisher/cgi-bin/mkfscript
 #include "util/mylogger.h"
 #include "tracker/Data/DataFrame.h"
 
-#ifndef HAS_DEPTHSENSEGRABBER
+#ifndef HAS_SOFTKINETIC
 SensorDepthSenseGrabber::SensorDepthSenseGrabber(Camera *camera) : Sensor(camera)
 {
     LOG(FATAL) << "SoftKinetic not available in your OS";
@@ -38,8 +38,6 @@ void SensorDepthSenseGrabber::stop(){}
 #include "tracker/Data/Camera.h"
 
 
-
-
 using namespace DepthSense;
 using namespace std;
 
@@ -54,43 +52,42 @@ int frameRateColor = 30;
 FrameFormat frameFormatDepth = FRAME_FORMAT_QVGA;
 const int widthDepth = 320, heightDepth = 240;
 
-/***********************************************************
-* Low pass filter                                          *
-* http://www-users.cs.york.ac.uk/~fisher/cgi-bin/mkfscript *
-***********************************************************/
+
+
+/**********************************************************
+ * Filter out inaccurate measurements with confidence map *
+ * Fix finger doubling in color map                       *
+ **********************************************************/
+
+#define DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP
+#if defined(DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP)
+const uint16_t confidenceThreshold = 100;
+
+#endif // DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP
+
+
+/*******************************************************
+ * Spatial smoothing with Gaussian blur                *
+ * Could be improved by only filtering up to the edges *
+ *******************************************************/
+
+#define DEPTHSENSEGRABBER_SMOOTH_SPATIAL
+
+int kernel_length = 3;
+
+/*******************************************
+ * Temporal smoothing with low-pass filter *
+ * http://www.exstrom.com/journal/sigproc/ *
+ *******************************************/
+
+#define DEPTHSENSEGRABBER_SMOOTH_TEMPORAL
 
 uint16_t maxDeltaDepth = 50;
-
-#define NZEROS 2
-#define NPOLES 2
-#define GAIN   1.076862368e+00
-
-#define FILTER_SIZE (NZEROS+1)
-float xvAll[heightDepth*widthDepth*(NZEROS+1)], yvAll[heightDepth*widthDepth*(NPOLES+1)];
-
-uint16_t filter(uint16_t sample, float* xv, float* yv)
-    // static_cast<float>(sample)
-      {
-        bool isInRange = true;
-        for (int i = 0; i < FILTER_SIZE; i++) {
-            isInRange *= abs(sample - yv[i]) < maxDeltaDepth;
-        }
-        if (not isInRange) return sample;
-        xv[0] = xv[1]; xv[1] = xv[2]; 
-        xv[2] = static_cast<float>(sample) / GAIN;
-        yv[0] = yv[1]; yv[1] = yv[2]; 
-        yv[2] =   (xv[0] + xv[2]) + 2 * xv[1]
-                     + ( -0.8623486260 * yv[0]) + ( -1.8521464854 * yv[1]);
-        return static_cast<uint16_t>(yv[2]);
-      }
-
-
-//http://www.exstrom.com/journal/sigproc/
 
 const int filterOrder = 2;
 const int filterSize = filterOrder/2;
 const int filterSamplingFreq = frameRateDepth;
-const int filterCornerFreq = 29;
+const int filterCornerFreq = 15;
 
 float filterA[filterSize];
 float filterD1[filterSize];
@@ -131,7 +128,7 @@ uint16_t filterNew(uint16_t sample, float* w0, float* w1, float* w2, int n, floa
 ///--- @note we read VGA, but then sub-sample to QVGA
 FrameFormat frameFormatColor = FRAME_FORMAT_VGA;
 const int widthColor = 320, heightColor = 240;
-    
+
 uint8_t noDepthBGR[3] = {255,255,255};
 int divideDepthBrightnessCV = 6;
 
@@ -166,8 +163,6 @@ void onNewColorSample(ColorNode, ColorNode::NewSampleReceivedData data);
 void onNewDepthSample(DepthNode node, DepthNode::NewSampleReceivedData data);
 
 
-int kernel_length = 3; // used if DEPTHSENSEGRABBER_SMOOTH is defined
-
 void configureDepthNode() {
     g_dnode.newSampleReceivedEvent().connect(&onNewDepthSample);
     DepthNode::Configuration config = g_dnode.getConfiguration();
@@ -178,6 +173,9 @@ void configureDepthNode() {
 
     g_dnode.setEnableDepthMap(true);
     g_dnode.setEnableUvMap(true);
+#if defined(DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP)
+    g_dnode.setEnableConfidenceMap(true);
+#endif // DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP
 
     try {
         g_context.requestControl(g_dnode,0);
@@ -210,7 +208,7 @@ void configureColorNode() {
     config.compression = COMPRESSION_TYPE_MJPEG; // can also be COMPRESSION_TYPE_YUY2
     config.powerLineFrequency = POWER_LINE_FREQUENCY_50HZ;
     config.framerate = frameRateColor;
-    
+
     g_cnode.setEnableColorMap(true);
 
     try {
@@ -356,49 +354,47 @@ void onNewDepthSample(DepthNode node, DepthNode::NewSampleReceivedData data) {
 #endif
            //cout << d << " ";
 
-            /*
-            float* xvLoc = xvAll + countDepth*(NZEROS+1);
-            float* yvLoc = yvAll + countDepth*(NPOLES+1);
-            d = filter(d, xvLoc, yvLoc);
-            */
 
+#if defined(DEPTHSENSEGRABBER_SMOOTH_TEMPORAL)
             float* w0 = w0All + countDepth*filterSize;
             float* w1 = w1All + countDepth*filterSize;
             float* w2 = w2All + countDepth*filterSize;
             d = filterNew(d, w0, w1, w2, filterSize, filterA, filterD1, filterD2);
+#endif // DEPTHSENSEGRABBER_SMOOTH_TEMPORAL
 
             ///--- Fetch color using UV map + raw color
             UV uv = data.uvMap[countDepth];
             int colorPixelRow = round(uv.v * heightColor); ///< -1??
             int colorPixelCol = round(uv.u * widthColor); ///< -1??
             bool in_range = (colorPixelCol < widthColor && colorPixelCol >= 0 && colorPixelRow < heightColor && colorPixelRow >= 0);
+#if defined(DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP)
+            uint16_t confidenceVal = data.confidenceMap[countDepth];
+            in_range *= (confidenceVal > confidenceThreshold);
+#endif // DEPTHSENSEGRABBER_USE_CONFIDENCE_MAP
             cv::Vec3b col = in_range ? color_raw.at<cv::Vec3b>(cv::Point(colorPixelCol, colorPixelRow)) : cv::Vec3b(255,255,255);
-                    
-            
+
+
             ///--- Set buffers
             int j_mirror = widthDepth -j -1;
             //depth[BACK_BUFFER].at<unsigned short>(cv::Point(j_mirror, i)) = d;
             depth[BACK_BUFFER].at<uint16_t>(cv::Point(j_mirror, i)) = d;
             color[BACK_BUFFER].at<cv::Vec3b>(cv::Point(j_mirror, i)) = col;
-            
+
             ///---
             countDepth++;
         }
     }
 
-#define DEPTHSENSEGRABBER_SMOOTH
-#if defined(DEPTHSENSEGRABBER_SMOOTH)
-    // We smoothen the depth maps using a spatial Gaussian filter
-    // Temporal smoothing would be more appropriate but adds a constraint on motion speed
+#if defined(DEPTHSENSEGRABBER_SMOOTH_SPATIAL)
     cv::GaussianBlur( depth[BACK_BUFFER], depth[BACK_BUFFER], cv::Size( kernel_length, kernel_length ), 0, 0 );
-#endif
+#endif // DEPTHSENSEGRABBER_SMOOTH_SPATIAL
 
     ///--- safe swap front & back
     // std::lock_guard<std::mutex> lock(color_mutex);
     while (true) {
         if (swap_mutex.try_lock()) {
-            std::swap( depth[0], depth[1] ); ///< because operator= is shallow    
-            std::swap( color[0], color[1] ); ///< because operator= is shallow    
+            std::swap( depth[0], depth[1] ); ///< because operator= is shallow
+            std::swap( color[0], color[1] ); ///< because operator= is shallow
             depth_frames_count++;
             swap_mutex.unlock();
             break;
@@ -414,7 +410,7 @@ SensorDepthSenseGrabber::SensorDepthSenseGrabber(Camera *camera) : Sensor(camera
 
 int SensorDepthSenseGrabber::initialize(){
     std::cout << "SensorDepthSenseGrabber::initialize()" << std::endl;
-    
+
     g_context = Context::create("localhost");
 
     g_context.deviceAddedEvent().connect(&onDeviceConnected);
@@ -461,17 +457,17 @@ int SensorDepthSenseGrabber::initialize(){
 
 SensorDepthSenseGrabber::~SensorDepthSenseGrabber(){
     std::cout << "~SensorDepthSenseGrabber()" << std::endl;
-    
+
     ///--- All resources was done in initialize()
     if(!initialized) return;
 
     /// stop sensor
-    g_context.stopNodes();   
+    g_context.stopNodes();
     if (g_cnode.isSet()) g_context.unregisterNode(g_cnode);
-    if (g_dnode.isSet()) g_context.unregisterNode(g_dnode); 
+    if (g_dnode.isSet()) g_context.unregisterNode(g_dnode);
     if (g_pProjHelper)
         delete g_pProjHelper;
-    
+
     /// kill thread
     // sensor_thread.join();
 }
@@ -480,7 +476,7 @@ SensorDepthSenseGrabber::~SensorDepthSenseGrabber(){
 bool SensorDepthSenseGrabber::spin_wait_for_data(Scalar timeout_seconds){
     if( (depth_frames_count>0) && (color_frames_count>0) )
         return true;
-    
+
     QElapsedTimer chrono;
     chrono.start();
 
@@ -491,8 +487,8 @@ bool SensorDepthSenseGrabber::spin_wait_for_data(Scalar timeout_seconds){
         if( chrono.elapsed() > 1000*timeout_seconds )
             return false;
     }
-    
-    
+
+
     return true;
 }
 
@@ -514,7 +510,7 @@ bool SensorDepthSenseGrabber::fetch_streams(DataFrame &frame){
         }
     }
 #endif
-    
+
 
 
     /*unsigned short mval = std::numeric_limits<unsigned short>::max();
@@ -539,10 +535,9 @@ bool SensorDepthSenseGrabber::fetch_streams(DataFrame &frame){
 
 void SensorDepthSenseGrabber::start()
 {
-#define DEPTHSENSEGRABBER_BUTTERWORTH
-#ifdef DEPTHSENSEGRABBER_BUTTERWORTH
+#if defined (DEPTHSENSEGRABBER_SMOOTH_TEMPORAL)
     initFilterWeights(filterA, filterD1, filterD2, filterSize, filterSamplingFreq, filterCornerFreq);
-#endif //DEPTHSENSEGRABBER_BUTTERWORTH
+#endif //DEPTHSENSEGRABBER_SMOOTH_TEMPORAL
     if(!initialized)
         this->initialize();
     g_context.startNodes();
