@@ -59,7 +59,7 @@ int SensorOpenNI::initialize()
     rc = kinect::OpenNI::initialize();
     if(rc!=kinect::STATUS_OK)
     {
-        qDebug()<<"Initialization Errors (if any): "<< kinect::OpenNI::getExtendedError();
+        mDebug()<<"Initialization Errors (if any): "<< kinect::OpenNI::getExtendedError();
         kinect::OpenNI::shutdown();
         exit(0);
     }
@@ -68,7 +68,7 @@ int SensorOpenNI::initialize()
     rc = device.open(deviceURI);
     if (rc != kinect::STATUS_OK)
     {
-        qDebug()<<"Device open failed: "<<kinect::OpenNI::getExtendedError();
+        mDebug()<<"Device open failed: "<<kinect::OpenNI::getExtendedError();
         kinect::OpenNI::shutdown();
         exit(0);
     }
@@ -82,20 +82,20 @@ int SensorOpenNI::initialize()
 
         if (rc != kinect::STATUS_OK)
         {
-            qDebug()<<"Couldn't start depth stream: "<<kinect::OpenNI::getExtendedError();
+            mDebug()<<"Couldn't start depth stream: "<<kinect::OpenNI::getExtendedError();
             g_depthStream.destroy();
             exit(0);
         }
     }
     else
     {
-        qDebug()<<"Couldn't find depth stream: "<<kinect::OpenNI::getExtendedError();
+        mDebug()<<"Couldn't find depth stream: "<<kinect::OpenNI::getExtendedError();
         exit(0);
     }
 
     if (!g_depthStream.isValid())
     {
-        qDebug()<<"No valid depth streams. Exiting";
+        mDebug()<<"No valid depth streams. Exiting";
         kinect::OpenNI::shutdown();
         exit(0);
     }
@@ -110,20 +110,20 @@ int SensorOpenNI::initialize()
 
         if (rc != kinect::STATUS_OK)
         {
-            qDebug()<<"Couldn't start color stream: "<<kinect::OpenNI::getExtendedError();
+            mDebug()<<"Couldn't start color stream: "<<kinect::OpenNI::getExtendedError();
             g_colorStream.destroy();
             exit(0);
         }
     }
     else
     {
-        qDebug()<<"Couldn't find color stream: "<<kinect::OpenNI::getExtendedError();
+        mDebug()<<"Couldn't find color stream: "<<kinect::OpenNI::getExtendedError();
         exit(0);
     }
 
     if (!g_colorStream.isValid())
     {
-        qDebug()<<"No valid color streams. Exiting";
+        mDebug()<<"No valid color streams. Exiting";
         kinect::OpenNI::shutdown();
         exit(0);
     }
@@ -240,7 +240,7 @@ bool SensorOpenNI::fetch_streams(DataFrame &frame)
     kinect::Status m_rc = device.setImageRegistrationMode(kinect::IMAGE_REGISTRATION_DEPTH_TO_COLOR);
     if (m_rc != kinect::STATUS_OK)
     {
-        qDebug()<<"Could not set Image Registration Mode";
+        mDebug()<<"Could not set Image Registration Mode";
         kinect::OpenNI::shutdown();
         exit(0);
     }

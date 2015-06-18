@@ -6,6 +6,7 @@
 #include "util/qt2eigen.h"
 #include "util/mylogger.h"
 #include <algorithm>
+#include <fstream>
 
 DataStream::DataStream(Camera *camera) : _camera(camera){
     assert( camera != NULL);
@@ -26,8 +27,8 @@ int DataStream::add_frame(const void* color_buffer, const void* depth_buffer){
     /// Clone the data
     if(color_buffer) frame.color = cv::Mat(height(), width(), CV_8UC3, (void*) color_buffer).clone();
     if(depth_buffer) frame.depth = cv::Mat(height(), width(), CV_16UC1, (void*) depth_buffer).clone();
-    if(!color_buffer) qDebug() << "warning: null color buffer?";
-    if(!depth_buffer) qDebug() << "warning: null depth buffer?";
+    if(!color_buffer) mDebug() << "warning: null color buffer?";
+    if(!depth_buffer) mDebug() << "warning: null depth buffer?";
     
 //#define TOMPSON_COLOR_IMAGE_FIX
 #ifdef TOMPSON_COLOR_IMAGE_FIX
@@ -41,11 +42,11 @@ int DataStream::add_frame(const void* color_buffer, const void* depth_buffer){
 DataFrame&DataStream::get_frame(int id){
     // CHECK_BOUNDS(id, frames.size()); 
     if(id < 0){
-        LOG(INFO) << "!!!WARNING frame_id out of bounds";
+        mWarning() << "frame_id out of bounds";
         return *(frames.at(0));
     }
     if(id >= frames.size()){
-        LOG(INFO) << "!!!WARNING frame_id out of bounds";        
+        mWarning() << "frame_id out of bounds";        
         return *(frames.at(frames.size()-1));
     }
     return *(frames.at(id)); 
@@ -55,7 +56,7 @@ DataFrame&DataStream::get_frame(int id){
 void DataStream::crop(int start, int end){
     CHECK_BOUNDS(start, 0, frames.size());
     CHECK_BOUNDS(end, 0, frames.size());
-    CHECK(start<end) << "!start<end";
+    CHECK(start<end);
     
     /// mark frame id as invalid in the range
     for(int i=0; i<frames.size(); i++)
@@ -79,7 +80,7 @@ QString DataStream::get_basename()
 
 void DataStream::save(QString path){
     if(frames.size()==0){
-        qWarning() << "WANING: not saving an empty stream";
+        mWarning() << "WARNING: not saving an empty stream";
         return;
     }
     

@@ -57,7 +57,7 @@ void HandFinder::binary_classification(DataFrame& frame) {
     _wristband_found = false;
 
     // LOG(INFO) << "Worker::binary_classification";
-    TIMED_SCOPE(timer, "Worker::binary_classification");
+    // TICTOC_SCOPE(timer, "Worker::binary_classification");
 
     cv::Mat& color = frame.color;
     cv::Mat& depth = frame.depth;

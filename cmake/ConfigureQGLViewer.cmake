@@ -1,5 +1,4 @@
-#--- QGLViewer
-find_package(QGLViewer REQUIRED)
+find_package(QGLViewer) #<<< Optional
 if(QGLVIEWER_FOUND)
     include_directories(${QGLVIEWER_INCLUDE_DIR})
     add_definitions(-DQGLVIEWER)

@@ -11,6 +11,7 @@ find_path(OPENNI2_INCLUDE_DIR "OpenNI.h"
         C:/Developer/include/openni
         #--- LINUX (self deployed)
         ${CMAKE_SOURCE_DIR}/openni/include
+        ${CMAKE_SOURCE_DIR}/../openni/include
     DOC "OpenNI c++ interface header")
 
 find_library(OPENNI2_LIBRARY "OpenNI2"
@@ -24,6 +25,7 @@ find_library(OPENNI2_LIBRARY "OpenNI2"
         C:/Developer/lib
         C:/Program Files/OpenNI2/Lib
         ${CMAKE_SOURCE_DIR}/openni/lib
+        ${CMAKE_SOURCE_DIR}/../openni/lib
     DOC "OpenNI2 library")
 
 #message(STATUS "OPENNI2_LIBRARY: ${OPENNI2_LIBRARY}")

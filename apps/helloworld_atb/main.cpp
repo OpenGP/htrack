@@ -5,12 +5,13 @@
 #include <QOpenGLVertexArrayObject>
 
 #include "../htrack_atb/AntTweakBarEventFilter.h"
-#include "AntTweakBar.h"
-TwBar* _bar = NULL;
+#include "tracker/TwSettings.h"
 
 float v1;
 float g1_v1;
 float g1_v2;
+
+#include "AntTweakBar.h"
 
 
 /// Format class to enable OpenGL4 core profile
@@ -38,18 +39,17 @@ public:
         bool success = vao.create();
         if(!success) exit(EXIT_FAILURE);
         vao.bind();
-        TwInit(TW_OPENGL_CORE, NULL);
-        TwWindowSize(this->width(), this->height());
-        _bar = TwNewBar ("Settings");
-        TwAddVarRW(_bar, "p", TW_TYPE_FLOAT, &v1, "min=.5 max=50 step=0.4");
-        TwAddVarRW(_bar, "V1", TW_TYPE_FLOAT, &g1_v1, " group=g1 ");
-        TwAddVarRW(_bar, "V2", TW_TYPE_FLOAT, &g1_v2, " group=g1 ");
+        tw_settings->tw_init(this->width(), this->height());
+        tw_settings->tw_add(v1, "v1", "min=.5 max=50 step=0.4");
+        tw_settings->tw_add(g1_v1, "g1_v1", "group=g1");
+        tw_settings->tw_add(g1_v2, "g1_v2", "group=g1");
     }
 
     void paintGL() {
         glClearColor(0,1,0,1); ///< green
         glClear(GL_COLOR_BUFFER_BIT);
-        TwWindowSize(this->width(), this->height());
+        tw_settings->tw_draw();
+        // TwWindowSize(this->width(), this->height());
         TwDraw();
     }
 };

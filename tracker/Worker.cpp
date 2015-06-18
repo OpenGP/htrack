@@ -85,8 +85,8 @@ TrackingError Worker::track(DataFrame& frame, bool rigid_only, bool eval_error){
     // LOG(INFO) << "iter: " << iteration << max_rigid_iters << (iteration < max_rigid_iters) << rigid_only;
 
     // LOG(INFO) << "----------------------------------------------------";
-    // LOG(INFO) << "Worker::track("<<frame.id<<")";
-    TIMED_SCOPE(timer,"Worker::track");
+    // mDebug() << "Worker::track("<<frame.id<<")";
+    // TICTOC_SCOPE(timer,"Worker::track");
 
     ///--- Classify the sensor pixels to produce Sensor silhouette
     handfinder->binary_classification(frame);

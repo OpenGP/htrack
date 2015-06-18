@@ -160,6 +160,7 @@ int main(int argc, char* argv[]){
 
 #if defined(OPENNI)
     Camera camera(QVGA, 60 /*FPS*/);
+    // Camera camera(QVGA, 30 /*FPS*/);
     SensorOpenNI sensor(&camera);
 #endif
 

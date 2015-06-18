@@ -8,10 +8,7 @@
 
 
 #ifndef HAS_REALSENSE
-    SensorRealSense::SensorRealSense(Camera *camera) : Sensor(camera){
-        LOG(INFO) << "Intel RealSense not available in your OS";
-        exit(0);
-    }
+    SensorRealSense::SensorRealSense(Camera *camera) : Sensor(camera){ mFatal() << "Intel RealSense not available in your OS"; }
     int SensorRealSense::initialize(){ return 0; }
     SensorRealSense::~SensorRealSense(){}
     bool SensorRealSense::spin_wait_for_data(Scalar timeout_seconds){ return false; }

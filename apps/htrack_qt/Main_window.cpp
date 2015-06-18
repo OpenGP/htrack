@@ -6,6 +6,7 @@
 #include "tracker/OpenGL/DebugRenderer/DebugRenderer.h"
 #include "cudax/Timer.h"
 #include "util/opencv_wrapper.h"
+#include "util/mylogger.h"
 
 #include "tracker/Worker.h"
 #include "tracker/Tracker.h"
@@ -357,7 +358,7 @@ void Main_window::menu_initialize_offset()
 
 void Main_window::display_frame(int frame_id){
     if((frame_id<0) || !(frame_id<datastream->size())){
-        printf("!!!WARNING frame_id out of range: 0<=%d<%d\n",frame_id, datastream->size());
+        mWarning("frame_id out of range: 0<=%d<%d\n",frame_id, datastream->size());
         fflush(stdout);
         return;
     }

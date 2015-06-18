@@ -8,12 +8,16 @@
 ///@{ Definition of extern settings
 TwSettings _settings;
 TwSettings* tw_settings = &_settings;
+int tw_width = 0;
+int tw_height = 0;
 ///@}
 
 void TwSettings::tw_init(int width, int height){
 #ifdef WITH_ANTTWEAKBAR
     // LOG(INFO) << "TwSettings::tw_init";
     TwInit(TW_OPENGL_CORE, NULL);
+    tw_width = width;
+    tw_height = height;
     TwWindowSize(width, height);
     this->bar = TwNewBar("Settings");
 #endif
@@ -27,12 +31,15 @@ void TwSettings::tw_cleanup(){
 
 void TwSettings::tw_resz(int width, int height){
 #ifdef WITH_ANTTWEAKBAR
-     TwWindowSize(width, height);
+    tw_width = width;
+    tw_height = height;
+    TwWindowSize(width, height);
 #endif
 }
 
 void TwSettings::tw_draw(){
 #ifdef WITH_ANTTWEAKBAR
+    TwWindowSize(tw_width, tw_height);
     glDisable(GL_DEPTH_TEST);
         TwDraw();
     glEnable(GL_DEPTH_TEST);
