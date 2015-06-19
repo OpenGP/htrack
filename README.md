@@ -6,8 +6,8 @@
 ## BibTex
 
     @article{htrack_sgp15,
-    author = {Andrea Tagliasacchi   and   Matthias Schroder   and   Anastasia Tkach and 
-              Sofien Bouaziz        and   Mario Botsch        and   Mark Pauly},
+    author = {Andrea Tagliasacchi   and   Matthias Schr{\"o}der   and   Anastasia Tkach and 
+              Sofien Bouaziz        and   Mario Botsch            and   Mark Pauly},
     title = {Robust Articulated-ICP for Real-Time Hand Tracking},
     journal = {Symposium on Geometry Processing (Computer Graphics Forum)},
     month = July,
