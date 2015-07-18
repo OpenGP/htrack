@@ -8,7 +8,10 @@ To obtain the results shown in the video (or as seen in the live demo sessions a
 - **Ubuntu 14.04** (on windows/osx the OS interferes with GPU on Compute/Graphics context switches) 
 - Intel Core **i7 @4GhZ**
 - CUDA Graphic card (**NVIDIA GTX980** used in our demo)
-- **Senz3D** depth camera (SENSOR_DEPTHSENSEGRABBER, use SoftKinetic or Intel/Creative) 
+- **Senz3D** depth camera (SENSOR_DEPTHSENSEGRABBER, use SoftKinetic or Intel/Creative)
+
+Other notes:
+- note the software must be compiled in **64bits**!
 - **Wristband** color calibration (make sure the wristband is detected robustly otherwise the tracking might not perform as effectively, you can check this by enabling "show wband" in the htrack_atb application)
 
 ## BibTex
