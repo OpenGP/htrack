@@ -20,14 +20,19 @@
 class GLWidget : public QGLWidget{
 public:
     Worker*const worker;
+    DataStream*const datastream;
+    SolutionStream*const solutions;
+
     Camera*const _camera;
     KinectDataRenderer kinect_renderer;
     Cylinders_renderer mrenderer;
 
 public:
-    GLWidget(Worker* worker):
+    GLWidget(Worker* worker, DataStream * datastream, SolutionStream * solution):
         QGLWidget(OpenGL32Format()),
         worker(worker),
+        datastream(datastream),
+        solutions(solutions),
         _camera(worker->camera),
         mrenderer(worker->cylinders)
     {
@@ -169,8 +174,11 @@ int main(int argc, char* argv[]){
     SensorRealSense sensor(&camera);
 #endif
 
+    DataStream datastream(&camera);
+    SolutionStream solutions;
+
     Worker worker(&camera);
-    GLWidget glarea(&worker);
+    GLWidget glarea(&worker, &datastream, &solutions);
     glarea.resize(640*2,480*2); ///< force resize
     worker.bind_glarea(&glarea); ///< TODO: can we avoid this?
 
@@ -178,8 +186,7 @@ int main(int argc, char* argv[]){
     Calibration(&worker).autoload();
     // glarea->reload_model(); ///< TODO
 
-    DataStream datastream(&camera);
-    SolutionStream solutions;
+
     glarea.show(); ///< calls GLWidget::InitializeGL
 
     Tracker tracker(&worker,camera.FPS());

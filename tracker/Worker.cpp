@@ -32,6 +32,8 @@ void Worker::init_graphic_resources(){
 
     tw_settings->tw_add(settings->termination_max_iters,"#iters","group=Tracker");
     tw_settings->tw_add(settings->termination_max_rigid_iters,"#iters (rigid)","group=Tracker");
+    tw_settings->tw_add(monitor.settings->moving_window_size,"failure confidence","group=Tracker");
+
 
     ///--- Initialize the energies modules
     using namespace energy;
@@ -41,7 +43,7 @@ void Worker::init_graphic_resources(){
     E_wristband.init(camera,skeleton,handfinder);
     E_limits.init(skeleton);
     E_collision.init(this);
-    E_pose.init(skeleton);
+    E_pose.init();
     E_temporal.init(skeleton);
     E_damping.init(skeleton);
 }

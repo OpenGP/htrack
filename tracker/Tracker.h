@@ -103,8 +103,7 @@ private:
             track_failed = aicp_enabled?worker->track_till_convergence(worker->current_frame):true;
             glFinish();
         }
-
-        if(init_enable && track_failed ){
+        if(init_enable && track_failed ){            
             static QianDetection detection(worker);
             if( detection.can_reinitialize() )
                 detection.reinitialize();

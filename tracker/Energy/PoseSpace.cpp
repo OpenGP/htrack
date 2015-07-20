@@ -4,6 +4,7 @@
 #include "util/qfile_helper.h"
 #include <QString>
 #include "tracker/TwSettings.h"
+#include "tracker/Types.h"
 
 bool explore_mode = false;
 bool random_pose = false;
@@ -43,25 +44,24 @@ namespace Eigen{
 }
 
 namespace energy{
-void PoseSpace::init(SkeletonSerializer *skeleton){
-    this->skeleton = skeleton;
+
+
+void PoseSpace::load_pca_data(){
     this->path_pca = local_file_path(subfolder_pca);
     std::cout << "Loading PCA data from: " << path_pca << std::endl;
-
-    tw_settings->tw_add(settings->enable_split_pca,"Enable","group=PoseSpace");
-    tw_settings->tw_add(settings->latent_size,"#dims","group=PoseSpace");
-    tw_settings->tw_add(settings->weight_proj,"weight(proj)","group=PoseSpace");
-    tw_settings->tw_add(settings->weight_mean,"weight(mean)","group=PoseSpace");
 
     Eigen::read_binary_vector<VectorN>(path_pca + "mu", mu);
 
     if (settings->enable_split_pca) {
+        m1 = min(num_thetas_thumb, settings->latent_size);
+        m4 = min(num_thetas_fingers, settings->latent_size);
         m = m1 + m4;
         string path_pca_thumb = path_pca + "thumb/";
         Eigen::read_binary<Matrix_MxN>(path_pca_thumb + "P", P1);
         Eigen::read_binary<Matrix_MxN>(path_pca_thumb + "Sigma", Sigma1);
         Eigen::read_binary<Matrix_MxN>(path_pca_thumb + "Limits", Limits1);
         Matrix_MxN P1_block = P1.block(0, 0, n1, m1);  P1 = P1_block;
+
         Matrix_MxN Sigma1_block = Sigma1.block(0, 0, m1, m1); Sigma1 = Sigma1_block;
         invSigma1 = Sigma1.inverse();
 
@@ -74,7 +74,7 @@ void PoseSpace::init(SkeletonSerializer *skeleton){
         invSigma4 = Sigma4.inverse();
     }
     else if (settings->enable_joint_pca) {
-        m = settings->latent_size;
+        m = min(num_thetas_pose, settings->latent_size);
         Eigen::read_binary<Matrix_MxN>(path_pca + "P", P);
         Eigen::read_binary<Matrix_MxN>(path_pca + "Sigma", Sigma);
         Eigen::read_binary<Matrix_MxN>(path_pca + "Limits", Limits);
@@ -83,6 +83,17 @@ void PoseSpace::init(SkeletonSerializer *skeleton){
         invSigma = Sigma.inverse();
     }
 }
+
+void PoseSpace::init(){
+
+    tw_settings->tw_add(settings->enable_split_pca,"Enable","group=PoseSpace");
+    tw_settings->tw_add(settings->latent_size,"#dims","group=PoseSpace");
+    tw_settings->tw_add(settings->weight_proj,"weight(proj)","group=PoseSpace");
+    tw_settings->tw_add(settings->weight_mean,"weight(mean)","group=PoseSpace");
+
+    load_pca_data();
+}
+
 
 void PoseSpace::find_pixel_coordinates_pca(int rows, int cols, const VectorN & x, const Matrix_MxN & Limits, float & pixels_x, float & pixels_y) {
     float axis_start_x = Limits(0, 0);
@@ -215,6 +226,7 @@ void PoseSpace::compose_system(int n, int m, Scalar alpha, Scalar beta, const Ve
 }
 
 void PoseSpace::track(LinearSystem & system, std::vector<float> _theta){
+
     if(!(settings->enable_joint_pca || settings->enable_split_pca))
         return;
     Eigen::Map<Thetas> theta(_theta.data());
@@ -226,6 +238,10 @@ void PoseSpace::track(LinearSystem & system, std::vector<float> _theta){
         explore_mode = false;
         random_pose = false;
     }
+
+    if ((settings->enable_joint_pca &&  m != min(num_thetas_pose,settings->latent_size)) ||
+        (settings->enable_split_pca && (m1 != min(num_thetas_thumb,settings->latent_size) || (m4 != min(num_thetas_fingers, settings->latent_size)))))
+        load_pca_data();
 
     Scalar weight_fingers = settings->weight_proj;
     Scalar weight_thumb = settings->weight_proj;
@@ -240,6 +256,7 @@ void PoseSpace::track(LinearSystem & system, std::vector<float> _theta){
     system = system_pca;
 
     VectorN y = theta.segment(p, n); y = y - mu;
+
     Matrix_MxN LHS; VectorN rhs;
     if (settings->enable_joint_pca) {
         VectorN x = P.transpose() * y;
@@ -250,6 +267,7 @@ void PoseSpace::track(LinearSystem & system, std::vector<float> _theta){
         system.lhs.block(p, p, n + m, n + m) += weight_fingers * LHS;
         system.rhs.segment(p, n + m) += weight_fingers * rhs;
     }
+
     Matrix_MxN LHS1, LHS4; VectorN rhs1, rhs4;
     if (settings->enable_split_pca) {
         VectorN y1 = y.segment(0, n1);

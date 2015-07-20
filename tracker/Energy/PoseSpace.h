@@ -7,21 +7,22 @@
 namespace energy{
 
 class PoseSpace : public Energy{
-    SkeletonSerializer* skeleton = NULL;
+    //SkeletonSerializer* skeleton = NULL;
 
 protected:
     struct Settings{
-        bool enable_split_pca = true;
+        bool enable_split_pca = false;
         float weight_proj = 10e3;
         float weight_mean = 10e1;
-        int latent_size = 2;
-        bool enable_joint_pca = false; ///< no thumb/fingers split
+        int latent_size = 3;
+        bool enable_joint_pca = true; ///< no thumb/fingers split
         bool debug_display_latent_space = false;
     } _settings;
     Settings* settings = &_settings;
 
 public:
-    void init(SkeletonSerializer*skeleton);
+    void init();
+    void load_pca_data();
     void track(LinearSystem &system, std::vector<float> theta);
 private:
     void find_pixel_coordinates_pca(int rows, int cols, const VectorN &x, const Matrix_MxN &Limits, float &pixels_x, float &pixels_y);

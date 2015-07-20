@@ -13,7 +13,7 @@ private:
 
 public:
     struct Settings{
-        bool display = false;
+        bool display = true;
     } _settings;
     Settings*const settings=&_settings;
 
