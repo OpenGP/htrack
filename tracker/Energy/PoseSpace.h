@@ -11,11 +11,11 @@ class PoseSpace : public Energy{
 
 protected:
     struct Settings{
-        bool enable_split_pca = false;
+        bool enable_split_pca = true;
         float weight_proj = 10e3;
         float weight_mean = 10e1;
         int latent_size = 3;
-        bool enable_joint_pca = true; ///< no thumb/fingers split
+        bool enable_joint_pca = false; ///< no thumb/fingers split
         bool debug_display_latent_space = false;
     } _settings;
     Settings* settings = &_settings;
