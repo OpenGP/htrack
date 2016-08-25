@@ -12,37 +12,29 @@ find_package(PkgConfig)
 pkg_check_modules(PC_LIBUSB REQUIRED libusb-1.0)
 include_directories( ${LIBUSB_1_INCLUDE_DIRS})
 
-# OpenGL
-find_package(OpenGL REQUIRED)
-include_directories(${OpenGL_INCLUDE_DIRS})
-link_directories(${OpenGL_LIBRARY_DIRS})
-add_definitions(${OpenGL_DEFINITIONS})
-if(NOT OPENGL_FOUND)
-    message(ERROR " OPENGL not found!")
-endif(NOT OPENGL_FOUND)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
+# include(../../cmake/ConfigureOpenCV.cmake)
+include(../../cmake/ConfigureOpenGL.cmake)
 
 # GLUT
-find_package(GLUT REQUIRED)
-include_directories(${GLUT_INCLUDE_DIRS} )
+#find_package(GLUT REQUIRED)
+#include_directories(${GLUT_INCLUDE_DIRS})
+#LIST(APPEND LIBRARIES ${GLUT_LIBRARY})
 
 # GLFW
 find_package(PkgConfig REQUIRED)
- pkg_search_module(GLFW REQUIRED glfw3)
+pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(${GLFW_INCLUDE_DIRS})
+LIST(APPEND LIBRARIES ${GLFW_LIBRARIES})
 
-# OpenCV
-find_package( OpenCV REQUIRED )
+
 
 # librealsense
-include_directories("/home/raghu/Desktop/librealsense/include")
-link_directories("/usr/local/lib")
-set(LIBS ${LIBS} realsense)
-
-link_directories( ${realsense_LIBRARY})
-include_directories( ${realsense_INCLUDE_DIR})
-
+set(LIBREALSENSE_INCLUDE_DIR "/home/raghu/Desktop/librealsense/include")
+set(LIBREALSENSE_LIBRARY "/usr/local/lib/librealsense.so")
+include_directories(${LIBREALSENSE_INCLUDE_DIR})
+list(APPEND LIBRARIES ${LIBREALSENSE_LIBRARY})
 
 aux_source_directory(. SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
-target_link_libraries( ${PROJECT_NAME}
-${LIBS} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLFW_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries( ${PROJECT_NAME} ${LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
