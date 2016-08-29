@@ -68,3 +68,15 @@ private:
 	int initialize();
 };
 
+class SensorLibRealSense : public Sensor {
+public:
+    SensorLibRealSense(Camera* camera);
+    virtual ~SensorLibRealSense();
+    bool spin_wait_for_data(float timeout_seconds);
+    bool fetch_streams(DataFrame& frame);
+    void start(); ///< calls initialize
+    void stop();
+private:
+    int initialize();
+};
+

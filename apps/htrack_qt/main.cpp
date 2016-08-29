@@ -54,6 +54,11 @@ int main(int argc, char* argv[]) {
     SensorRealSense sensor(&camera);
 #endif
 
+#if defined(LIBREALSENSE)
+    Camera camera(Intel, 60 /*FPS*/);
+    SensorLibRealSense sensor(&camera);
+#endif
+
     DataStream datastream(&camera);
     datastream.load(filename_data);
 

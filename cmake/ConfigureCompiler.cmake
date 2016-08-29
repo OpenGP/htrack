@@ -27,6 +27,12 @@ elseif(UNIX)
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=native -DNDEBUG")
     #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto -fwhole-program")
+
+    #The following are needed if you are using librealsense
+    #add_compile_options(-std=c++11 -fPIC -lusb-1.0 -lpthread )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lusb-1.0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread")
 elseif(WIN32)
     message(STATUS "Compiler(Windows): Visual Studio 12 2013 Win64")
     if (CMAKE_BUILD_TYPE STREQUAL "Release")

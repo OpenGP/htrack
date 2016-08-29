@@ -108,7 +108,7 @@ private:
                 this->close();
                 break;
             case Qt::Key_1:
-                // make_hand_thinner();
+                // mak666666666666666e_hand_thinner();
                 worker->skeleton->scaleWidth(-5);
                 Calibration::update_radius_helper(worker->cylinders, worker->skeleton);
                 qglviewer->reload_model();
@@ -172,6 +172,11 @@ int main(int argc, char* argv[]){
 #if defined(REALSENSE)
     Camera camera(QVGA, 60 /*FPS*/);
     SensorRealSense sensor(&camera);
+#endif
+
+#if defined(LIBREALSENSE)
+    Camera camera(Intel, 60 /*FPS*/);
+    SensorLibRealSense sensor(&camera);
 #endif
 
     DataStream datastream(&camera);
