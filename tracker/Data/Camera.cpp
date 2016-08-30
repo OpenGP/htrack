@@ -57,6 +57,7 @@ Camera::Camera(CAMERAMODE mode, int fps):_mode(mode), _fps(fps){
            _zFar = 500;
            _zNear = 100;
             break;
+        break;
         default:
             printf("!!!FATAL: Invalid Camera");
             exit(0);

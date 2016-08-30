@@ -24,34 +24,24 @@
 #include <vector>
 #include <exception>
 #include <opencv2/opencv.hpp>
+
 #include <iostream>
 #include <limits>
-
 #include <QElapsedTimer>
 #include <QApplication>
 #include <QMessageBox>
-
 #include <librealsense/rs.hpp>
-//#include <sstream>
-//#include <thread>
-//#include <memory>
-
-#include <opencv2/highgui/highgui.hpp>
 #include "tracker/Data/DataFrame.h"
+#include "tracker/Data/Camera.h"
 
 using namespace std;
 
-//PXCImage::ImageData depth_buffer;
-//PXCImage::ImageData color_buffer;
 
-//PXCSenseManager *sense_manager;
-//PXCProjection *projection;
 rs::context ctx;
 rs::device * dev;
 
 int D_width  = 640;
 int D_height = 480;
-int COUNTER = 0;
 
 SensorLibRealSense::SensorLibRealSense(Camera *camera) : Sensor(camera) {
     if (camera->mode() != Intel)
@@ -71,12 +61,12 @@ int SensorLibRealSense::initialize() {
 
 
     // Configure depth and color to run with the device's preferred settings
-    dev->enable_stream(rs::stream::depth, D_width, D_height, rs::format::z16, 60);
+    dev->enable_stream(rs::stream::depth,  D_width, D_height, rs::format::z16, 60);
     dev->enable_stream(rs::stream::color, D_width, D_height, rs::format::rgb8, 60);
-    printf("Enabled Streams");
-
+    printf("Enabled Streams:Depth and Color\n");
 
     dev->start();
+    printf("Device Started\n");
 
     this->initialized = true;
     return true;
@@ -109,9 +99,9 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
     if (initialized == false) this->initialize();
 
     if(frame.depth.empty())
-        frame.depth = cv::Mat(cv::Size(D_width, D_height), CV_16UC1, cv::Scalar(0));
+        frame.depth = cv::Mat(cv::Size(D_width/2, D_height/2), CV_16UC1, cv::Scalar(0));
     if(frame.color.empty())
-        frame.color = cv::Mat(cv::Size(D_width, D_height), CV_8UC3, cv::Scalar(0, 0, 0));
+        frame.color = cv::Mat(cv::Size(D_width/2, D_height/2), CV_8UC3, cv::Scalar(0, 0, 0));
 
     dev->wait_for_frames();
     const uint16_t * depth_image = (const uint16_t *)dev->get_frame_data(rs::stream::depth);
@@ -124,17 +114,17 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
 
 
 
-    cv::Mat depth_buffer = cv::Mat(cv::Size(D_width, D_height), CV_16UC1, (void *)depth_image);
-    cv::Mat color_buffer = cv::Mat(cv::Size(D_width, D_height), CV_8UC3, cv::Scalar(0,0,0));
-    //cout<<depth_intrin.width<<" "<<depth_intrin.height<<endl;
+    cv::Mat depth_buffer = cv::Mat(cv::Size(D_width, D_height), CV_16UC1, cv::Scalar(0));
+    cv::Mat color_buffer = cv::Mat(cv::Size(D_width, D_height), CV_8UC3, cv::Scalar(255,255,255));
     for(int dy=0; dy<depth_intrin.height; ++dy)
     {
         for(int dx=0; dx<depth_intrin.width; ++dx)
         {
-            uint16_t depth_value = depth_image[dy * depth_intrin.width + dx];
+            uint16_t depth_value = depth_image[dy * depth_intrin.width + (depth_intrin.width-dx-1)];
             float depth_in_meters = depth_value * scale;
+
             if(depth_value == 0) continue;
-            rs::float2 depth_pixel = {(float)dx, (float)dy};
+            rs::float2 depth_pixel = {(float)(depth_intrin.width-dx-1), (float)dy};
             rs::float3 depth_point = depth_intrin.deproject(depth_pixel, depth_in_meters);
             rs::float3 color_point = depth_to_color.transform(depth_point);
             rs::float2 color_pixel = color_intrin.project(color_point);
@@ -142,6 +132,7 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
             if(cx < 0 || cy < 0 || cx >= color_intrin.width || cy >= color_intrin.height)
             {
                 color_buffer.at<cv::Vec3b>(dy, dx) = cv::Vec3b(255,255,255);
+                depth_buffer.at<unsigned short>(dy,dx) = (unsigned short)0;
             }
             else
             {
@@ -150,6 +141,7 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
                 unsigned char g = color_image[cy * D_width * 3 + (cx) * 3 + 1];
                 unsigned char b = color_image[cy * D_width * 3 + (cx) * 3 + 2];
                 color_buffer.at<cv::Vec3b>(dy, dx) = cv::Vec3b(r,g,b);
+                depth_buffer.at<unsigned short>(dy,dx) = (unsigned short)(depth_in_meters*1000);
             }
         }
     }
