@@ -29,6 +29,7 @@ FIND_LIBRARY( ANTTWEAKBAR_LIBRARY AntTweakBar${BITS} PATHS
     #--- Windows
     C:/Developer/lib
     #---
+    /usr/local/lib
     /usr/local
     /usr/X11
     /usr

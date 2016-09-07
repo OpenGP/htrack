@@ -15,7 +15,6 @@
     bool SensorLibRealSense::fetch_streams(DataFrame &frame){ return false; }
     void SensorLibRealSense::start(){}
     void SensorLibRealSense::stop(){}
-
 #else
 
 #include "Sensor.h"
@@ -59,10 +58,9 @@ int SensorLibRealSense::initialize() {
     printf("    Serial number: %s\n", dev->get_serial());
     printf("    Firmware version: %s\n", dev->get_firmware_version());
 
-
-    // Configure depth and color to run with the device's preferred settings
     dev->enable_stream(rs::stream::depth,  D_width, D_height, rs::format::z16, 60);
     dev->enable_stream(rs::stream::color, D_width, D_height, rs::format::rgb8, 60);
+
     printf("Enabled Streams:Depth and Color\n");
 
     dev->start();
@@ -112,18 +110,17 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
     rs::intrinsics color_intrin = dev->get_stream_intrinsics(rs::stream::color);
     float scale = dev->get_depth_scale();
 
-
-
-    cv::Mat depth_buffer = cv::Mat(cv::Size(D_width, D_height), CV_16UC1, cv::Scalar(0));
-    cv::Mat color_buffer = cv::Mat(cv::Size(D_width, D_height), CV_8UC3, cv::Scalar(255,255,255));
-    for(int dy=0; dy<depth_intrin.height; ++dy)
+    cv::Mat depth_buffer = cv::Mat(cv::Size(D_width/2, D_height/2), CV_16UC1, cv::Scalar(0));
+    cv::Mat color_buffer = cv::Mat(cv::Size(D_width/2, D_height/2), CV_8UC3, cv::Scalar(255,255,255));
+    for(int dy=0,dy_sub=0; dy<depth_intrin.height; dy+=2,dy_sub++)
     {
-        for(int dx=0; dx<depth_intrin.width; ++dx)
+        for(int dx=0,dx_sub=0; dx<depth_intrin.width; dx+=2,dx_sub++)
         {
             uint16_t depth_value = depth_image[dy * depth_intrin.width + (depth_intrin.width-dx-1)];
             float depth_in_meters = depth_value * scale;
-
+            float pixel_depth_in_mm = depth_in_meters * 1000;
             if(depth_value == 0) continue;
+
             rs::float2 depth_pixel = {(float)(depth_intrin.width-dx-1), (float)dy};
             rs::float3 depth_point = depth_intrin.deproject(depth_pixel, depth_in_meters);
             rs::float3 color_point = depth_to_color.transform(depth_point);
@@ -131,23 +128,20 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
             const int cx = (int)std::round(color_pixel.x), cy = (int)std::round(color_pixel.y);
             if(cx < 0 || cy < 0 || cx >= color_intrin.width || cy >= color_intrin.height)
             {
-                color_buffer.at<cv::Vec3b>(dy, dx) = cv::Vec3b(255,255,255);
-                depth_buffer.at<unsigned short>(dy,dx) = (unsigned short)0;
+                color_buffer.at<cv::Vec3b>(dy_sub, dx_sub) = cv::Vec3b(255,255,255);
             }
             else
             {
-                //frame.color.at<cv::Vec3b>(dy, dx) = color_buffer.at<cv::Vec3b>(dy,dx);
                 unsigned char r = color_image[cy * D_width * 3 + (cx) * 3 + 0];
                 unsigned char g = color_image[cy * D_width * 3 + (cx) * 3 + 1];
                 unsigned char b = color_image[cy * D_width * 3 + (cx) * 3 + 2];
-                color_buffer.at<cv::Vec3b>(dy, dx) = cv::Vec3b(r,g,b);
-                depth_buffer.at<unsigned short>(dy,dx) = (unsigned short)(depth_in_meters*1000);
+                color_buffer.at<cv::Vec3b>(dy_sub, dx_sub) = cv::Vec3b(r,g,b);
+                depth_buffer.at<unsigned short>(dy_sub,dx_sub) = (unsigned short)pixel_depth_in_mm;
             }
         }
     }
-
-    cv::resize(color_buffer, frame.color, cv::Size(D_width/2,D_height/2));
-    cv::resize(depth_buffer, frame.depth, cv::Size(D_width/2,D_height/2));
+    frame.color = color_buffer;
+    frame.depth = depth_buffer;
     return true;
 }
 

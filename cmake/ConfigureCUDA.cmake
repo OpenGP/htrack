@@ -37,6 +37,8 @@ elseif(HOSTNAME STREQUAL "nastylinux") #--- Anastasia
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -w -Xcompiler -fPIC -D__CUDACC__" )
 elseif(HOSTNAME STREQUAL "thp") #--- THP/Alienware
     set(CUDA_NVCC_FLAGS "-gencode arch=compute_30,code=sm_30")# GTX780M
+elseif(HOSTNAME STREQUAL "teakwood") #--- THP/Alienware
+    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_50,code=sm_50") # GTX980 (Win/Linux Machine)
 
 #--- Generic
 else()

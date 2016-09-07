@@ -23,10 +23,10 @@ public:
         //gamma = Vector3(23.57251f, 8.20843f, -4.07201f);
         //#endif
         //#if defined(SOFTKIN)
-        //gamma = Vector3(0.0f, 25.708f, -1.7853f);
+        gamma = Vector3(0.0f, 25.708f, -1.7853f);
         //#endif
         //#if defined(LIBREALSENSE)
-        gamma = Vector3(0.0f, 44.6325f, -1.7853f);
+        //gamma = Vector3(0.0f, 44.6325f, -1.7853f);
         //#endif
 
         /*ofstream errors_file;
