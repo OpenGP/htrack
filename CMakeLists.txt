@@ -46,5 +46,5 @@ add_definitions(${DEFINITION_SENSOR})
 
 add_subdirectory(apps/htrack_atb)
 add_subdirectory(apps/htrack_qt)
+add_subdirectory(apps/colorpick)
 #add_subdirectory(apps/synthgen) #<<< NOT READY
-#add_subdirectory(apps/colopick) #<<< NOT READY

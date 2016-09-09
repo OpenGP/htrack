@@ -6,8 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
-
-#include "Util.h"
+#include "tracker/Legacy/util/Util.h"
 
 using namespace cv;
 using namespace std;
