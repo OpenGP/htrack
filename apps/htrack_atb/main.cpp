@@ -108,7 +108,7 @@ private:
                 this->close();
                 break;
             case Qt::Key_1:
-                // mak666666666666666e_hand_thinner();
+                // make_hand_thinner();
                 worker->skeleton->scaleWidth(-5);
                 Calibration::update_radius_helper(worker->cylinders, worker->skeleton);
                 qglviewer->reload_model();

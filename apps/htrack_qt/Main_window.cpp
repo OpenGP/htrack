@@ -134,6 +134,10 @@ Main_window::Main_window(Worker* worker, DataStream* stream, SolutionStream* sol
             connect(A_track_whole, SIGNAL(toggled(bool)), this, SLOT(track_whole_sequence(bool)));
         }
         {
+            QAction* action = track->addAction( "Set Valid (to scrub solution)" );
+            connect(action, SIGNAL(triggered()), this, SLOT(menu_set_valid()));
+        }
+        {
             QAction* action = track->addAction( "Set current solution" );
             // action->setShortcut( Qt::Key_S );
             connect(action, SIGNAL(triggered()), this, SLOT(menu_set_current_solution()));
@@ -354,6 +358,12 @@ void Main_window::menu_initialize_offset()
     worker->handfinder->binary_classification(worker->current_frame);
     worker->trivial_detector->exec(worker->current_frame, worker->handfinder->sensor_silhouette);
     qglviewer->updateGL();
+}
+
+void Main_window::menu_set_valid()
+{
+    //allows sequence to be scrubbed
+    solutions->setValid();
 }
 
 void Main_window::display_frame(int frame_id){

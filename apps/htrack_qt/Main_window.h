@@ -59,6 +59,7 @@ private slots:
     void menu_track_till_convergence_pressed(){ emit requested_track_till_convergence(slider->value()); }
     void menu_initialize_offset();
     void menu_set_current_solution(){ emit set_current_solution(slider->value()); };
+    void menu_set_valid();
 /// @}
 
 
