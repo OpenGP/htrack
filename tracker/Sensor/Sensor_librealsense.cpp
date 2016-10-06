@@ -38,9 +38,12 @@ using namespace std;
 
 rs::context ctx;
 rs::device * dev;
+rs::intrinsics depth_intrin, color_intrin;
+rs::extrinsics depth_to_color;
 
 int D_width  = 640;
 int D_height = 480;
+float scale;
 
 SensorLibRealSense::SensorLibRealSense(Camera *camera) : Sensor(camera) {
     if (camera->mode() != Intel)
@@ -60,6 +63,11 @@ int SensorLibRealSense::initialize() {
 
     dev->enable_stream(rs::stream::depth,  D_width, D_height, rs::format::z16, 60);
     dev->enable_stream(rs::stream::color, D_width, D_height, rs::format::rgb8, 60);
+
+    depth_intrin = dev->get_stream_intrinsics(rs::stream::depth);
+    depth_to_color = dev->get_extrinsics(rs::stream::depth, rs::stream::color);
+    color_intrin = dev->get_stream_intrinsics(rs::stream::color);
+    scale = dev->get_depth_scale();
 
     printf("Enabled Streams:Depth and Color\n");
 
@@ -101,14 +109,11 @@ bool SensorLibRealSense::fetch_streams(DataFrame &frame) {
     if(frame.color.empty())
         frame.color = cv::Mat(cv::Size(D_width/2, D_height/2), CV_8UC3, cv::Scalar(0, 0, 0));
 
-    dev->wait_for_frames();
+    dev->poll_for_frames();
     const uint16_t * depth_image = (const uint16_t *)dev->get_frame_data(rs::stream::depth);
     const uint8_t * color_image = (const uint8_t *)dev->get_frame_data(rs::stream::color);
 
-    rs::intrinsics depth_intrin = dev->get_stream_intrinsics(rs::stream::depth);
-    rs::extrinsics depth_to_color = dev->get_extrinsics(rs::stream::depth, rs::stream::color);
-    rs::intrinsics color_intrin = dev->get_stream_intrinsics(rs::stream::color);
-    float scale = dev->get_depth_scale();
+
 
     cv::Mat depth_buffer = cv::Mat(cv::Size(D_width/2, D_height/2), CV_16UC1, cv::Scalar(0));
     cv::Mat color_buffer = cv::Mat(cv::Size(D_width/2, D_height/2), CV_8UC3, cv::Scalar(255,255,255));

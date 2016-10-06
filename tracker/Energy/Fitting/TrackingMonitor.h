@@ -23,15 +23,16 @@ public:
         //gamma = Vector3(23.57251f, 8.20843f, -4.07201f);
         //#endif
         //#if defined(SOFTKIN)
-        gamma = Vector3(0.0f, 25.708f, -1.7853f);
+        //gamma = Vector3(0.0f, 25.708f, -1.7853f);
         //#endif
         //#if defined(LIBREALSENSE)
-        //gamma = Vector3(0.0f, 44.6325f, -1.7853f);
+        gamma = Vector3(23.57251f, 8.20843f, -4.07201f);
+        //gamma = Vector3(18.5036f,0.6373f,-2.8113f);
         //#endif
 
-        /*ofstream errors_file;
-            if (!errors_file.is_open()) errors_file.open("/home/raghu/Desktop/errors.txt", ios::app);
-            errors_file << push_error << " " << pull_error << endl;*/
+//        ofstream errors_file;
+//            if (!errors_file.is_open()) errors_file.open("/home/raghu/Desktop/errors.txt", ios::app);
+//            errors_file << push_error << " " << pull_error << endl;
 
 
         Vector3 x = Vector3(1.0, push_error, pull_error);
